@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ContraxAware - Contract Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tabulator CSS -->
+  <link href="https://unpkg.com/tabulator-tables@5.6.1/dist/css/tabulator.min.css" rel="stylesheet" />
+
+  <!-- Icon Library -->
+  <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/lucide.css" rel="stylesheet" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      display: flex;
+    }
+    #sidebar {
+      width: 48px;
+      background-color: #1c1c1c;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      transition: width 0.3s ease;
+      overflow: hidden;
+    }
+    #sidebar.expanded {
+      width: 200px;
+      align-items: flex-start;
+      padding-left: 20px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 9px 10px 8px 24px;
+      width: 100%;
+      cursor: pointer;
+      color: white;
+      white-space: nowrap;
+    }
+    .menu-item i {
+      margin-right: 10px;
+    }
+    .menu-item span {
+      display: none;
+    }
+    #sidebar.expanded .menu-item span {
+      display: inline;
+    }
+    #app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background-color: #f2f4ff;
+      border-bottom: 1px solid #ccc;
+    }
+    #topbar-left, #topbar-right {
+      display: flex;
+      align-items: center;
+    }
+    .topbar-logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #2b3f89;
+      margin-right: 20px;
+    }
+    .topbar-button {
+      display: flex;
+      align-items: center;
+      margin-left: 15px;
+      background-color: white;
+      border: 1px solid #2b3f89;
+      color: #2b3f89;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .topbar-button i {
+      margin-right: 6px;
+    }
+    .topbar-icon {
+      background: none;
+      border: none;
+      margin-left: 10px;
+      cursor: pointer;
+      color: #2b3f89;
+    }
+    #toolbar {
+      background-color: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+    }
+    #main-pane {
+      display: flex;
+      flex: 1;
+    }
+    #table-pane {
+      flex: 2;
+      padding: 10px;
+      overflow: auto;
+    }
+    #detail-pane {
+      flex: 1;
+      border-left: 1px solid #ccc;
+      padding: 20px;
+      background-color: #fff;
+    }
+    h2 {
+      margin-top: 0;
+      color: #2b3f89;
+    }
+    a {
+      color: #2b3f89;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .toolbar-button {
+      margin-right: 10px;
+      padding: 6px 12px;
+      background-color: #2b3f89;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .toolbar-button:hover {
+      background-color: #1f2e6d;
+    }
+    .icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      color: #2b3f89;
+      cursor: pointer;
+    }
+    .icon-button:hover {
+      color: #1f2e6d;
+    }
+    .tabulator-header-filter input {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <div class="menu-item"><i data-lucide="file-text"></i><span> Contracts</span></div>
+    <div class="menu-item"><i data-lucide="calendar"></i><span> Expirations</span></div>
+    <div class="menu-item"><i data-lucide="settings"></i><span> Settings</span></div>
+  </div>
+  <div id="app">
+    <div id="topbar">
+      <div id="topbar-left">
+        <i data-lucide="home" class="topbar-icon"></i>
+        <div class="topbar-logo">ContraxAware</div>
+        <button class="topbar-button"><i data-lucide="diamond"></i> See plans</button>
+      </div>
+      <div id="topbar-right">
+        <button class="topbar-icon" data-lucide="bell"></button>
+        <button class="topbar-icon" data-lucide="user-plus"></button>
+        <button class="topbar-icon" data-lucide="search"></button>
+        <button class="topbar-icon" data-lucide="help-circle"></button>
+        <button class="topbar-icon" data-lucide="settings"></button>
+      </div>
+    </div>
+    <div id="toolbar"></div>
+    <div id="main-pane">
+      <div id="table-pane">
+        <div id="contract-table"></div>
+      </div>
+      <div id="detail-pane">
+        <h2>Contract Details</h2>
+        <div id="contract-details">Select a row to view details</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/tabulator-tables@5.6.1/dist/js/tabulator.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="contracts-data.js"></script>
+  <script src="global.js"></script>
+  <script src="ui-utils.js"></script>
+  <script src="toolbar.js"></script>
+  <script src="tableMenu.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.addEventListener("mouseenter", () => {
+        sidebar.classList.add("expanded");
+        lucide.createIcons();
+      });
+      sidebar.addEventListener("mouseleave", () => {
+        sidebar.classList.remove("expanded");
+        lucide.createIcons();
+      });
+
+      const detailDiv = document.getElementById("contract-details");
+
+      window.table = new Tabulator("#contract-table", {
+        height: "100%",
+        data: window.contractsData,
+        layout: "fitColumns",
+        placeholder: "No contracts available.",
+        movableColumns: true,
+        groupBy: false,
+        columns: [
+          {
+            title: "",
+            formatter: () => '<i data-lucide="eye" class="icon-button"></i>',
+            width: 50,
+            hozAlign: "center",
+            cellClick: (e, cell) => {
+              const data = cell.getRow().getData();
+              detailDiv.innerHTML = `
+                <strong>Title:</strong> ${data.title}<br/>
+                <strong>Party A:</strong> ${data.partyA}<br/>
+                <strong>Party B:</strong> ${data.partyB}<br/>
+                <strong>Effective Date:</strong> ${data.effectiveDate}<br/>
+                <strong>Expiration Date:</strong> ${data.expirationDate}<br/>
+                <strong>Type:</strong> ${data.contractType}<br/>
+                <strong>Owner:</strong> ${data.owner}<br/>
+                <strong>Value:</strong> ${data.contractValue}<br/>
+                <a href="${data.contractFile}" target="_blank">Open Contract</a>
+              `;
+            },
+          },
+          ...window.contractsColumns.map(col => ({ ...col, headerFilter: false })),
+        ],
+        renderComplete: () => lucide.createIcons(),
+      });
+
+      setTimeout(() => {
+        window.table.redraw(true);
+        lucide.createIcons();
+      }, 150);
+
+      let filtersShown = false;
+
+      if (typeof createToolbar === "function") {
+        createToolbar({
+          containerId: "toolbar",
+          onFilterToggle: () => {
+            filtersShown = !filtersShown;
+            window.table.getColumns().forEach(col => {
+              col.updateDefinition({ headerFilter: filtersShown ? "input" : false });
+            });
+            window.table.redraw(true);
+          },
+          onExportCSV: () => window.table.download("csv", "contracts.csv"),
+          onExportXLSX: () => window.table.download("xlsx", "contracts.xlsx"),
+          onPrint: () => window.table.print(false, true),
+          onViewManager: () => {
+            if (typeof openViewManager === "function") openViewManager();
+          }
+        });
+      }
+
+      if (typeof initTableMenu === "function") {
+        initTableMenu(window.table);
+      }
+
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
